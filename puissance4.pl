@@ -1,22 +1,21 @@
 
 % Tableau initial
-initialiser(grille([                    %  _______________________
-		   ["_","_","_","_","_","_"],   % |(1:1)             (6;1)|
-	       ["_","_","_","_","_","_"],   % |
+initialiser(grille([
+		   ["_","_","_","_","_","_"],   
+	       ["_","_","_","_","_","_"],  
 	       ["_","_","_","_","_","_"],
 	       ["_","_","_","_","_","_"],
 	       ["_","_","_","_","_","_"],
 	       ["_","_","_","_","_","_"],
-	       ["_","_","_","_","_","_"]    % |                  (6;7)|
+	       ["_","_","_","_","_","_"] 
 ])).
+
+
 % Dans la grille du dessus, chaque ligne correspond à une collone du jeu de puissance4.
 % la casse de coordonnée (1;1) dans la grille ci-dessus correspond à la case "tout en haut à droite" du jeu de puissance4
 % La casse de coordonnée (6;7) dans la grille ci-dessus correspond à la case "tout en bas  à gauche" du jeu de puissance4
 
-
-
 puissance4 :- initialiser(X), afficher(X), jouerCoup('X',X).
-
 
 
 % Fonction pour ajouter au dessus du dernier pion
@@ -38,8 +37,8 @@ afficherColonne(G,Nl,Nc):- write().
 
 
 %%Jouer coups
-joueurSuivant('X','O');
-joueurSuivant('O','X');
+joueurSuivant('X','O').
+joueurSuivant('O','X').
         %%cas où le jeu s'arrête 
 gameOver(grille(G)) :- victoire(X,G),write('Victoire du joueur '), write(X),!. 
 gameOver(grille(G)) :- plein(G), write('Match nul, la grille est pleine!'),!.
@@ -53,8 +52,8 @@ jouerCoup(Joueur,G) :- write('Au tour de '), write(Joueur), write(' de jouer.'),
             jouerCoup(JoueurSuivant). %faire jouer le joueur suivant
 
 
-%Pour pouvoir jouer un coup, il faut que la grille ne soit pas pleine
-remplie(grille(G)):- append(_,[C1,C2,C3,C4,C5,C6,C7|_],G),
+%Pour pouvoir jouer un coup, il faut que la grille ne soit pas remplie
+full(grille(G)):- append(_,[C1,C2,C3,C4,C5,C6,C7|_],G),
 		   append(I1,[X|_],C1), I1\=='_',
            append(I2,[X|_],C2), I2\=='_',
 		   append(I3,[X|_],C3), I3\=='_',
@@ -62,8 +61,18 @@ remplie(grille(G)):- append(_,[C1,C2,C3,C4,C5,C6,C7|_],G),
 		   append(I5,[X|_],C5), I5\=='_',
            append(I6,[X|_],C6), I6\=='_',
 		   append(I7,[X|_],C7), I7\=='_',
-		   length(I1,L1),length(I2,L2),length(I3,L3),length(I4,L4),length(I5,L5),length(I6,L6),length(I7,L7),
+		   length(C1,L1),length(C2,L2),length(C3,L3),length(C4,L4),length(C5,L5),length(C6,L6),length(C7,L7),
 		   L1 >= 6, L2 >= 6, L3 >= 6, L4 >= 6, L5 >= 6, L6 >= 6, L7 >= 6.
+
+%%%Ne marche pas mais pourquoi donc
+remplie(grille(G)):- append(_,[C1,C2,C3,C4,C5,C6,C7|_],G),
+		   append(I1,[X|_],C1), \+ member('_',C1),
+		   append(I2,[X|_],C2), \+ member('_',C2),
+		   append(I3,[X|_],C3), \+ member('_',C3),
+		   append(I4,[X|_],C4), \+ member('_',C4),
+		   append(I5,[X|_],C5), \+ member('_',C5),
+           append(I6,[X|_],C6), \+ member('_',C6),
+		   append(I7,[X|_],C7), \+ member('_',C7).
 
 %Calcul de quand le joueur peut gagner
 %4 cas pour gagner
