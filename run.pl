@@ -3,20 +3,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Tableau initial
 initialiser([
-		   ['_','_','_','_','_','_'],   
+		   ['_','_','_','_','_','_'],
 	       ['_','_','_','_','_','_'],  
 	       ['_','_','_','_','_','_'],
 	       ['_','_','_','_','_','_'],
 	       ['_','_','_','_','_','_'],
-	       ['_','_','_','_','_','_'],
-	       ['_','_','_','_','_','_'] 
-]).
-initialiser2([
-		   ['_','_','O','X','X','X'],   
-	       ['_','_','_','_','_','X'],  
-	       ['_','_','_','_','O','X'],
-	       ['_','_','_','_','O','X'],
-	       ['_','_','_','_','_','O'],
 	       ['_','_','_','_','_','_'],
 	       ['_','_','_','_','_','_'] 
 ]).
@@ -27,8 +18,6 @@ initialiser2([
 
 puissance4 :- initialiser(G), afficher(G), nl, jouerCoup('X', G).
 
-puissance2 :- initialiser2(G), afficher(G), nl, victoire('O',G).
-
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Mécaniques du jeu %%
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -37,20 +26,28 @@ joueurSuivant('O','X').
 
 remplie(G):- append(G,X), \+ member('_', X).
 
-gameOver(G) :- victoire(X,G),write('Victoire du joueur '), write(X), !.
-gameOver(G) :- remplie(G), write('Match nul, la grille est pleine!'), !.
+gameOver(Joueur,G):- victoire(Joueur,G), write('Victoire du joueur '), write(Joueur), !.
+gameOver(_,G):- remplie(G), write('Match nul, la grille est pleine!'), !.
 
-jouerCoup(_,G):- gameOver(G).
-jouerCoup(Joueur,G) :- write('Au tour de '), write(Joueur), write(' de jouer.'),
-            lireColonne(C),
-            ajouterDansColonne(Joueur, C, G, G2),
-            joueurSuivant(Joueur, JoueurSuivant), %changer de joueur
-            jouerCoup(JoueurSuivant, G2). %faire jouer le joueur suivant
+jouerCoup(Joueur,G):- joueurSuivant(Joueur, JoueurSuivant), gameOver(JoueurSuivant,G).
+jouerCoup('X',G):-
+			write('Au tour de X de jouer.'),
+            lireColonne(C), % entrée utilisateur
+            ajouterDansColonne('X', C, G, G2),
+			afficher(G2), nl, %afficher la grille de jeu
+            jouerCoup('O', G2). %faire jouer le joueur suivant
+jouerCoup('O',G):- 
+			write('Au tour de O de jouer.'), nl,
+            random(1,7,C),
+            ajouterDansColonne('O', C, G, G2),
+			afficher(G2), nl, %afficher la grille de jeu
+            jouerCoup('X', G2). %faire jouer le joueur suivant
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Afficher la grille %%
 %%%%%%%%%%%%%%%%%%%%%%%%
-afficher(G):- afficherLignes(G,6).
+afficher(G):- afficherLignes(G,6), !.
 
 afficherLignes(_,0).
 afficherLignes(G,N):- afficherLigne(G,G2), nl, N2 is N-1, afficherLignes(G2,N2).
