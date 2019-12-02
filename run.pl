@@ -12,11 +12,22 @@ initialiser([
 	       ['_','_','_','_','_','_'] 
 ]).
 
+initialiser2([
+		   ['_','_','_','O','X','X'],
+	       ['_','_','_','_','_','_'],  
+	       ['O','X','O','X','O','X'],
+	       ['_','_','_','_','_','_'],
+	       ['_','_','_','_','_','_'],
+	       ['_','_','_','_','_','_'],
+	       ['X','O','X','X','X','O'] 
+]).
+
 % Dans la grille du dessus, chaque ligne correspond à une colonne du jeu de puissance4.
 % la casse de coordonnée (1;1) dans la grille ci-dessus correspond à la case "tout en haut à droite" du jeu de puissance4
 % La casse de coordonnée (6;7) dans la grille ci-dessus correspond à la case "tout en bas  à gauche" du jeu de puissance4
 
 puissance4 :- initialiser(G), afficher(G), nl, jouerCoup('X', G).
+puissance3 :- initialiser2(G), afficher(G), noLooseDirect('O', G,7).
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Mécaniques du jeu %%
@@ -38,8 +49,10 @@ jouerCoup('X',G):-
             jouerCoup('O', G2). %faire jouer le joueur suivant
 jouerCoup('O',G):- 
 			write('Au tour de O de jouer.'), nl,
-            random(1,7,C),
-            ajouterDansColonne('O', C, G, G2),
+			%repeat,
+            %random(1,8,C),
+			ia1('O', G, G2),
+            %ajouterDansColonne('O', C, G, G2),
 			afficher(G2), nl, %afficher la grille de jeu
             jouerCoup('X', G2). %faire jouer le joueur suivant
 
@@ -64,11 +77,11 @@ afficherLigne([[X|Y]|Z],[Y|Z2]):- write(X), write(' '), afficherLigne(Z,Z2).
 %% Ajouter un coup (jeton) dans une colonne précise %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Fonction pour ajouter dans une colonne précise
-ajouterDansColonne(X,1,[Y|Z],[Y2|Z]):- ajouterAuDessus(X,Y,Y2).
+ajouterDansColonne(X,1,[Y|Z],[Y2|Z]):- ajouterAuDessus(X,Y,Y2),!.
 ajouterDansColonne(X,N,[Y|Z],[Y|T]):- N2 is N-1, ajouterDansColonne(X,N2,Z,T).
 
 % Fonction pour ajouter au dessus du dernier pion
-ajouterAuDessus(X,['_'],[X]). % si la colonne est vide, on ajoute à la fin
+ajouterAuDessus(X,['_'],[X]):- !. % si la colonne est vide, on ajoute à la fin
 ajouterAuDessus(X,['_',H|Q],[X,H|Q]):- H \== ('_'), !. % si l'on souhaite jouer au dessus de quelqu'un
 ajouterAuDessus(X,['_'|Q],['_'|Q2]):- ajouterAuDessus(X,Q,Q2). % utilisé pour descendre dans la colonne
 
@@ -78,7 +91,7 @@ ajouterAuDessus(X,['_'|Q],['_'|Q2]):- ajouterAuDessus(X,Q,Q2). % utilisé pour d
 %Calcul de quand le joueur peut gagner
 %4 cas pour gagner
 %CAS N°1 = Le joueur X gagne car il a passé 4 pions à la verticale
-victoire(X,G):- append(_, [H|_], G), append(_,[X,X,X,X|_],H). 
+victoire(X,G):- append(_, [H|_], G), append(_,[X,X,X,X|_],H),!.
 %CAS N°2 = Le joueur X gagne car il a passé 4 pions à l'horizontal
 victoire(X,G):- append(_,[C1,C2,C3,C4|_],G), %4 colonnes adjacentes
            append(I1,[X|_],C1),
@@ -115,6 +128,44 @@ col(4).
 col(5).
 col(6).
 col(7).
+
+
+
+noLooseDirect(_, _, 0):-!.
+noLooseDirect(S, G, C):-joueurSuivant(S,S2), 
+						((ajouterDansColonne(S2, C, G, G2)) ->
+						(\+ victoire(S2,G2),
+						C2 is C-1, 
+						noLooseDirect(S, G, C2));
+						(C2 is C-1, 
+						noLooseDirect(S, G, C2))).
+
+
+						
+					
+
+%noWinDirect(S, G, 0).
+%noWinDirect(S, G, C, W):-((ajouterDansColonne(S, C, G, G2) ;(C2 is C-1, noLooseDirect(S, G, C2))) , not(victoire(S,G2)), C2 is C-1, noLooseDirect(S, G, C2).
+
+
+%ia1(S, G, G2):- not(noWinDirect())
+ia1(S, G, G2):-ajouterDansColonne(S, 4, G, G2), noLooseDirect(S, G2,7).
+ia1(S, G, G2):-ajouterDansColonne(S, 5, G, G2), noLooseDirect(S, G2,7).
+ia1(S, G, G2):-ajouterDansColonne(S, 3, G, G2), noLooseDirect(S, G2,7).
+ia1(S, G, G2):-ajouterDansColonne(S, 6, G, G2), noLooseDirect(S, G2,7).
+ia1(S, G, G2):-ajouterDansColonne(S, 2, G, G2), noLooseDirect(S, G2,7).
+ia1(S, G, G2):-ajouterDansColonne(S, 7, G, G2), noLooseDirect(S, G2,7).
+ia1(S, G, G2):-ajouterDansColonne(S, 1, G, G2), noLooseDirect(S, G2,7).
+
+
+ia1(S, G, G2):-ajouterDansColonne(S, 4, G, G2).
+ia1(S, G, G2):-ajouterDansColonne(S, 5, G, G2).
+ia1(S, G, G2):-ajouterDansColonne(S, 3, G, G2).
+ia1(S, G, G2):-ajouterDansColonne(S, 6, G, G2).
+ia1(S, G, G2):-ajouterDansColonne(S, 2, G, G2).
+ia1(S, G, G2):-ajouterDansColonne(S, 7, G, G2).
+ia1(S, G, G2):-ajouterDansColonne(S, 1, G, G2).
+
 
 lireColonne(C):- nl, write('Colonne : '), repeat,
 		get_char(L),
