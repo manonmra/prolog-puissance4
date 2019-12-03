@@ -1,7 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initialisation et lancement du jeu %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % Tableau initial
 initialiser([
 		   ['_','_','_','_','_','_'],
@@ -13,15 +12,18 @@ initialiser([
 	       ['_','_','_','_','_','_'] 
 ]).
 
+
+
 % Dans la grille du dessus, chaque ligne correspond à une colonne du jeu de puissance4.
 % la casse de coordonnée (1;1) dans la grille ci-dessus correspond à la case "tout en haut à droite" du jeu de puissance4
 % La casse de coordonnée (6;7) dans la grille ci-dessus correspond à la case "tout en bas  à gauche" du jeu de puissance4
+
 puissance4 :- initialiser(G), afficher(G), nl, jouerCoup('X', G).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Mécaniques du jeu %%
 %%%%%%%%%%%%%%%%%%%%%%%
-
 joueurSuivant('X','O').
 joueurSuivant('O','X').
 
@@ -50,7 +52,6 @@ jouerCoup('O',G):-
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Afficher la grille %%
 %%%%%%%%%%%%%%%%%%%%%%%%
-
 afficher(G):- afficherLignes(G,6), !.
 
 afficherLignes(_,0).
@@ -67,7 +68,6 @@ afficherLigne([[X|Y]|Z],[Y|Z2]):- write(X), write(' '), afficherLigne(Z,Z2).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Ajouter un coup (jeton) dans une colonne précise %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % Fonction pour ajouter dans une colonne précise
 ajouterDansColonne(X,1,[Y|Z],[Y2|Z]):- ajouterAuDessus(X,Y,Y2),!.
 ajouterDansColonne(X,N,[Y|Z],[Y|T]):- N2 is N-1, ajouterDansColonne(X,N2,Z,T).
@@ -80,13 +80,10 @@ ajouterAuDessus(X,['_'|Q],['_'|Q2]):- ajouterAuDessus(X,Q,Q2). % utilisé pour d
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Vérification partie finie (gagnant) %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %Calcul de quand le joueur peut gagner
 %4 cas pour gagner
-
 %CAS N°1 = Le joueur X gagne car il a passé 4 pions à la verticale
 victoire(X,G):- append(_, [H|_], G), append(_,[X,X,X,X|_],H),!.
-
 %CAS N°2 = Le joueur X gagne car il a passé 4 pions à l'horizontal
 victoire(X,G):- append(_,[C1,C2,C3,C4|_],G), %4 colonnes adjacentes
            append(I1,[X|_],C1),
@@ -95,7 +92,6 @@ victoire(X,G):- append(_,[C1,C2,C3,C4|_],G), %4 colonnes adjacentes
 		   append(I4,[X|_],C4),
 		   length(I1,L1), length(I2,L2), length(I3,L3), length(I4,L4),
            L1 is L2, L1 is L3, L1 is L4.
-		   
 %CAS N°3 = Le joueur X gagne car il a crée une diagonale de gauche (haut) à droite (bas)
 victoire(X,G):- append(_,[C1,C2,C3,C4|_],G), %4 colonnes adjacentes
 		   append(I1,[X|_],C1),
@@ -103,8 +99,7 @@ victoire(X,G):- append(_,[C1,C2,C3,C4|_],G), %4 colonnes adjacentes
 		   append(I3,[X|_],C3),
 		   append(I4,[X|_],C4),
 		   length(I1,L1), length(I2,L2), length(I3,L3), length(I4,L4),
-		   L2 is L1-1, L3 is L2-1, L4 is L3-1.
-		   
+		   L2 is L1-1, L3 is L2-1, L4 is L3-1. 
 %CAS N°4 = Le joueur X gagne car il a créé une diagonale de gauche (bas) à droite (haut)
 victoire(X,G):- append(_,[C1,C2,C3,C4|_],G), %4 colonnes adjacentes
 		   append(I1,[X|_],C1),
@@ -117,7 +112,6 @@ victoire(X,G):- append(_,[C1,C2,C3,C4|_],G), %4 colonnes adjacentes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Lecture de la colonne utilisateur %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %colonnes valides
 col(1).
 col(2).
@@ -135,7 +129,6 @@ lireColonne(C):- nl, write('Colonne : '), repeat,
 %%%%%%%%%
 %% IA1 %%
 %%%%%%%%%
-
 %vérifie si l'adversaire peut gagner au coup suivant
 nePerdPasAuProchainCoup(_, _, 0):-!.
 nePerdPasAuProchainCoup(S, G, C):-joueurSuivant(S,S2), 
@@ -147,16 +140,16 @@ nePerdPasAuProchainCoup(S, G, C):-joueurSuivant(S,S2),
 						nePerdPasAuProchainCoup(S, G, C2))).
 						
 %vérifie si l'IA peut gagner à ce coup
-neGagnePasEnUnCoup(_, _, 0):-!.
+neGagnePasEnUnCoup(_, _, 0):-fail.
 neGagnePasEnUnCoup(S, G, C, C2):-  ((ajouterDansColonne(S, C, G, G2)) ->
-						(\+ victoire(S,G2),
-						C2 is C-1,
+						((victoire(S,G2)->!;
+						C2 is C-1, 
 						neGagnePasEnUnCoup(S, G, C2, C2));
 						(C2 is C-1, 
 						neGagnePasEnUnCoup(S, G, C2, C2))).
 						
 %implémentation de l'IA1 (si possible cherche à jouer au milieu de la grille)
-ia1(S, G, G2, C):- \+ neGagnePasEnUnCoup(S, G, 7, C), ajouterDansColonne(S, C, G, G2).
+ia1(S, G, G2, C):- neGagnePasEnUnCoup(S, G, 7, C), ajouterDansColonne(S, C, G, G2).
 ia1(S, G, G2, _):-ajouterDansColonne(S, 4, G, G2), nePerdPasAuProchainCoup(S, G2,7).
 ia1(S, G, G2, _):-ajouterDansColonne(S, 5, G, G2), nePerdPasAuProchainCoup(S, G2,7).
 ia1(S, G, G2, _):-ajouterDansColonne(S, 3, G, G2), nePerdPasAuProchainCoup(S, G2,7).
@@ -173,60 +166,3 @@ ia1(S, G, G2, _):-ajouterDansColonne(S, 6, G, G2).
 ia1(S, G, G2, _):-ajouterDansColonne(S, 2, G, G2).
 ia1(S, G, G2, _):-ajouterDansColonne(S, 7, G, G2).
 ia1(S, G, G2, _):-ajouterDansColonne(S, 1, G, G2).
-
-%%%%%%%%%%%%%
-%% MIN MAX %%
-%%%%%%%%%%%%%
-
-adversaire('O','X'). 
-adversaire('X','O').
-
-% choisir le MeilleurCoup parmi l'ensemble des Coups à partir de la grille courante
-% en utilisant minmax, anticipant de Profondeur niveaux. Flag indique si l'on minimise ou maximise couramment. 
-% Record enregistre le meilleur mouvement courant. 
-evaluerEtChoisir([Coup|Coups], Grille, Profondeur, Flag, Record, MeilleurCoup, Joueur):- 
-	ajouterDansColonne(Joueur, Coup, Grille, Grille1),
-	minmax(Profondeur, Grille1, MaxMin, Coup, Valeur, Joueur), 
-	maj(Coup, Valeur, Record, Record1), 
-	adversaire(Joueur, ProchainJoueur), 
-	evaluerEtChoisir(Coups, Grille, Profondeur, MaxMin, Record1, MeilleurCoup, ProchainJoueur). 
-evaluerEtChoisir([], Grille, Profondeur, MaxMin, Record, MeilleurCoup). 
-
-minmax(0, Grille, MaxMin, Coup, Valeur, Joueur):-
-	valeur(Grille, Coup, V, Joueur),
-	Valeur is V*MaxMin. 
-minmax(Profondeur, Grille, MaxMin, Coup, Valeur, Joueur):-
-	Profondeur>0,
-	set_of(M, bouger(Grille, M), Coups),
-	Profondeur1 is Profondeur-1,
-	MinMax is -MaxMin,
-	evaluerEtChoisir(Coups, Grille, Profondeur1, MinMax, (nil,-1000),(Coup, Valeur)). 
-
-maj(Coup, Valeur, (Coup1, Valeur1), (Coup1, Valeur1)):-
-	Valeur=<Valeur1. 
-maj(Coup, Valeur, (Coup1,Valeur1),(Coup,Valeur)):-
-	Valeur>=Valeur1. 
-
-valeur(Grille, Coup, V, Joueur):-
-	V is 0, 
-	pointsDePosition(Grille, Coup, Points1, Joueur),
-	V is V+Points1, 
-	pointsDeBlocage(Grille,Points2),
-	V is V+Points2. 
-
-testPointsDePosition(X) :- initialiser(X), pointsDePosition(X, 5, Points1, 'O').
-
-pointsDePosition(Grille, Coup, Point, Joueur):-
-	Point is 0, 
-	%regarder si on aligne notre nouveau pion avec d'autres pions
-	%regardons vers le bas
-	write('test'),
-	write(Joueur), write(Coup), write(Grille),
-	recupererLaColonneDuCoup(Joueur, Coup, Grille, Col),
-	write(Y).
-
-recupererLaColonneDuCoup(X,1,[Y|Z],Col):- Col is Y, !.
-recupererLaColonneDuCoup(X,N,[Y|Z],Col):- N2 is N-1, recupererLaColonneDuCoup(X,N2,Z,Col).
-
-%ajouterDansColonne(X,1,[Y|Z],[Y2|Z]):- ajouterAuDessus(X,Y,Y2),!.
-%ajouterDansColonne(X,N,[Y|Z],[Y|T]):- N2 is N-1, ajouterDansColonne(X,N2,Z,T).
