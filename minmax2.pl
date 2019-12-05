@@ -28,6 +28,10 @@ joueurSuivant('O','X').
 
 remplie(G):- append(G,X), \+ member('_', X).
 
+listeColonnesDisponibles(_,_,8).
+listeColonnesDisponibles([['_'|Col]|Cols],Liste,N):- N2 is N+1, listeColonnesDisponibles(Cols,[N|Liste],N2).
+listeColonnesDisponibles([Col|Cols],Liste,N):- N2 is N+1, listeColonnesDisponibles(Cols,Liste,N2).
+
 gameOver(Joueur,G):- victoire(Joueur,G), write('Victoire du joueur '), write(Joueur), !.
 gameOver(_,G):- remplie(G), write('Match nul, la grille est pleine!'), !.
 
@@ -42,8 +46,10 @@ jouerCoup('O',G):-
 			write('Au tour de O de jouer.'), nl,
 			%repeat,
             %random(1,8,C),
+            %listeColonnesDisponibles(G,Liste,1),
             creerUneListeTest(Liste),
-			evaluerEtChoisir(Liste, G, 0, 1, (0,-1001), (Coup,Valeur), 'O'),
+            nl, write('Liste : '), write(Liste),nl,
+			evaluerEtChoisir(Liste, G, 0, 1, (0,-1001), (Coup,Valeur), 'O'),nl,
             ajouterDansColonne('O', Coup, G, G2),
 			afficher(G2), nl, %afficher la grille de jeu
             jouerCoup('X', G2). %faire jouer le joueur suivant
